@@ -51,10 +51,6 @@ const DownloadPhase = ({ setDownloadPhase, newAccount }) => {
                 </span>
                 <span>
                   <FaRegCopy className="text-xl" onClick={copy_text} />
-
-
-
-                  
                 </span>
               </p>
             </div>

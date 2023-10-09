@@ -3,6 +3,10 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import HandleError from "./HandleError";
 import { AiOutlineCloseSquare } from "react-icons/ai";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+
 const ethers = require("ethers");
 
 const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
@@ -39,13 +43,13 @@ const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
       try {
         console.log("----------------");
         window.alert("Your account is already exits");
-        navigate("/wallet");
+        // navigate("/");
       } catch (error) {
         setErrorVisible(true);
         if (phase == "") {
-          setErrorMessage("Enter your mnmonic key!");
+          toast("Enter your mnmonic key!");
         } else {
-          setErrorMessage(
+          toast(
             "Your mnmonic key is not curret, enter a valid mnmonic key"
           );
         }
@@ -66,7 +70,7 @@ const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
         sessionStorage.setItem("myData", JSON.stringify(sendRecoverData));
         window.location.href = "/recoveraccount";
       } catch (error) {
-        console.log("error", error);
+        toast("Enter a valid mnmonic key")
       }
     }
   };

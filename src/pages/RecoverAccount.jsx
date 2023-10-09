@@ -2,6 +2,9 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { userAccount } from "../redux/features/userAcc";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const RecoverAccount = () => {
 
   const navigate = useNavigate();
@@ -12,6 +15,8 @@ const RecoverAccount = () => {
 
   const Import_account = async () => {
     dispatch(userAccount(dataReceived));
+    toast("Account Imported Successfully");
+    // setTimeout(()=>navigate("/"),5000);
     navigate("/");
   }
 

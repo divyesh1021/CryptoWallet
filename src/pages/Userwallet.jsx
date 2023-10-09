@@ -10,6 +10,7 @@ import { FaEthereum } from "react-icons/fa";
 import { FaRegCopy } from "react-icons/fa";
 import { FaTrashRestoreAlt } from "react-icons/fa";
 import { FaUnlock } from "react-icons/fa";
+import { FaRegCheckCircle } from "react-icons/fa";
 import { removeUser } from "../redux/features/userAcc";
 import Form from "../components/Recoverphase";
 import Popup from "../components/PrivatekeyPopup";
@@ -17,6 +18,8 @@ import Transaction from "../components/Transaction";
 import DownloadPhase from "../components/DownloadPhase";
 import Password from "../components/Password";
 import DeleteModal from "../components/DeleteModal";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ethers = require("ethers");
 const bip39 = require("bip39");
@@ -28,6 +31,7 @@ const Userwallet = () => {
   const recoverData = location.state?.data || null;
 
   const [selectedOption, setSelectedOption] = useState("Account 1");
+  const [chainNetwork,setChainNetwork] = useState("");
   const [accountData, setAccountData] = useState({
     Public_key: "",
     Private_key: "",
@@ -44,11 +48,32 @@ const Userwallet = () => {
   const [openTransaction, setTransaction] = useState(false);
   const [newAccount, setNewAccount] = useState({});
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [openDeleteBox,setopenDeleteBox ] = useState(false);
+  const [openDeleteBox, setopenDeleteBox] = useState(false);
+
+  const Network = [
+    {
+      Network_Name: "Ethereum Testnet",
+      Network_Provider:
+        "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f",
+    },
+    {
+      Network_Name: "Binance Testnet",
+      Network_Provider:"https://data-seed-prebsc-1-s1.binance.org:8545/",
+    }
+  ];
 
   const provider = new ethers.providers.JsonRpcProvider(
     "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f"
   );
+
+  // const provider = new ethers.providers.JsonRpcProvider(
+  //   "https://data-seed-prebsc-1-s1.binance.org:8545/"
+  // );
+
+  const data = Network?.filter((el) => el.Network_Name === chainNetwork);
+  console.log("daay90-0========",data);
+
+  // const provider = new ethers.providers.JsonRpcProvider(data.Network_Provider);
 
   // const handleButtonClick = () => {
   //   setFormVisibility(!isFormVisible);
@@ -75,6 +100,8 @@ const Userwallet = () => {
   useEffect(() => {
     // When the component first loads, set the default option and display its data
     handleDropdownChange({ target: { value: selectedOption } });
+    handleChangeChainNetwork({ target: { value: chainNetwork } })
+    // Get_Transaction();
   }, []);
 
   console.log("getting", Account);
@@ -93,7 +120,10 @@ const Userwallet = () => {
     const text = accountData.Public_key;
     navigator.clipboard
       .writeText(text)
-      .then(() => setCopied(true))
+      .then(() => {
+        setCopied(true);
+        toast("Text copid!!");
+      })
       .catch((error) => console.log(error));
   };
 
@@ -105,13 +135,21 @@ const Userwallet = () => {
 
   console.log(openTransaction);
 
+  const handleChangeChainNetwork = (event) => {
+    const selectedChainNetwork = event.target.value;
+    console.log("selectedChainNetwork------->>>>>>>>",selectedChainNetwork);
+    setChainNetwork(selectedChainNetwork);
+  }
+
   const handleDropdownChange = async (event) => {
     const selectedValue = event.target.value;
+    console.log("selectedValue------->>>>>>>>",selectedValue);
     setSelectedOption(selectedValue);
 
     if (selectedValue.startsWith("Account ")) {
-      const accountIndex =
-        parseInt(selectedValue.replace("Account ", ""), 10) - 1;
+      console.log("selectedValue-----------------", selectedValue);
+      const accountIndex = parseInt(selectedValue.replace("Account ", "")) - 1;
+      console.log("-----------------", accountIndex);
       const account = Account[accountIndex];
 
       try {
@@ -182,7 +220,7 @@ const Userwallet = () => {
 
   const handleDelete = () => {
     setopenDeleteBox(true);
-  }
+  };
 
   const handleLockUnlock = () => {
     if (!GetPassword) {
@@ -192,15 +230,18 @@ const Userwallet = () => {
     }
   };
 
+  console.log("Account------------->>>>>>>>.", Account[0].mnemonic);
+
+  console.log("chainNetwork------------->>>>>>>>.",Network[0].Network_Name);
+
+
+
   return (
     <>
       {handlelock ? (
         // <div className="h-[550px] border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
-        <div className=" container mx-auto  border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
-          <div
-            className="flex justify-around font-normal gap-2 flex-wrap flex-col 2xl:flex-row xl:flex-row lg:flex-row
-          "
-          >
+        <div className="flex flex-col gap-5 container mx-auto  border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
+          <div className="flex justify-around font-normal gap-2 flex-wrap flex-col 2xl:flex-row xl:flex-row lg:flex-row">
             <button
               className="items-center border-2 rounded-xl p-2 text-lg"
               onClick={get_account}
@@ -229,6 +270,21 @@ const Userwallet = () => {
               </span>
             </button>
           </div>
+          <div className="flex flex-col justify-center gap-5">
+            <h1 className="text-xl font-medium">Select Your Chain</h1>
+            <select
+              value={chainNetwork}
+              onChange={handleChangeChainNetwork}
+              className="border-2 rounded-lg text-xl p-2 w-auto"
+            >
+              <option value="">Select Chain</option>
+              {Network.map((value, index) => (
+                <option key={index} value={value.Network_Name}>
+                  {value.Network_Name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="flex flex-col justify-center py-10 gap-5">
             <select
               value={selectedOption}
@@ -241,97 +297,72 @@ const Userwallet = () => {
                   {`Account ${index + 1}`}
                 </option>
               ))}
-              <option value="generate">Generate Account</option>
-              <option value="recover">Recover Account</option>
+              {/* <option value="generate">Generate Account</option>
+              <option value="recover">Recover Account</option> */}
             </select>
-            {selectedOption === "generate" || selectedOption === "recover" ? (
+            {/* {selectedOption === "generate" || selectedOption === "recover" ? (
               <button
                 className="border-2 rounded-lg text-xl p-2 w-auto"
                 onClick={handleButtonClick}
               >
                 {selectedOption === "generate"
                   ? "Generate Account"
-                  : "Recover Account"}
+                  : "Recover Account"}  
               </button>
-            ) : (
-              <div className="flex flex-col gap-4">
-                <p className="flex justify-between border-2 rounded-xl p-3 bg-blue-300 gap-3">
-                  <span className="flex gap-2 break-all">
-                    <FaEthereum className="text-2xl" />
-                    {accountData.Public_key}
-                  </span>
-                  <span>
-                    <FaRegCopy className="text-xl" onClick={copy_text} />
-                  </span>
-                </p>
-                <h1 className="text-xl font-bold text-center">
-                  Balance: {accountData.balance} ETH
-                </h1>
-                <button
-                  className="text-lg font-semibold"
-                  onClick={() =>
-                    handleTransaction(
-                      accountData.Public_key,
-                      accountData.Private_key
-                    )
-                  }
-                >
-                  <span className="flex justify-center">
-                    <BsFillArrowUpRightCircleFill
-                      className="text-center text-4xl"
-                      fill="rgb(96 165 250)"
+            ) : ( */}
+            <div className="flex flex-col gap-4">
+              <p className="flex justify-between border-2 rounded-xl p-3 bg-blue-300 gap-3">
+                <span className="flex gap-2 break-all">
+                  <FaEthereum className="text-2xl" />
+                  {accountData.Public_key}
+                </span>
+                <span>
+                  {copied ? (
+                    <FaRegCheckCircle
+                      className="text-xl"
+                      fill="green"
+                      onClick={copy_text}
                     />
-                  </span>
-                  send
-                </button>
-                <button
-                  className="border-2 rounded-xl p-3"
-                  onClick={() => unlockPrivatekey(accountData.Private_key)}
-                >
-                  Export Private_key
-                </button>
-                <button
-                  className="border-2 rounded-xl p-3"
-                  // onClick={() => Delete_Account(accountData.Public_key)}
-                  onClick={handleDelete}
-                >
-                  Delete Account
-                </button>
-              </div>
-            )}
+                  ) : (
+                    <FaRegCopy className="text-xl" onClick={copy_text} />
+                  )}
+                </span>
+              </p>
+              <h1 className="text-xl font-bold text-center">
+                Balance: {accountData.balance} ETH
+              </h1>
+              <button className="text-lg font-semibold">
+                <span className="flex justify-center">
+                  <BsFillArrowUpRightCircleFill
+                    className="text-center text-4xl"
+                    fill="rgb(96 165 250)"
+                    onClick={() =>
+                      handleTransaction(
+                        accountData.Public_key,
+                        accountData.Private_key
+                      )
+                    }
+                  />
+                </span>
+                send
+              </button>
+              <button
+                className="border-2 rounded-xl p-3"
+                onClick={() => unlockPrivatekey(accountData.Private_key)}
+              >
+                Export Private_key
+              </button>
+              <button
+                className="border-2 rounded-xl p-3"
+                // onClick={() => Delete_Account(accountData.Public_key)}
+                onClick={handleDelete}
+              >
+                Delete Account
+              </button>
+            </div>
+            {/* )} */}
           </div>
-          {/* <div className="flex flex-col gap-5 bg-blue-100 items-center py-10">
-            <div className="flex justify-around w-full">
-              <h1 className="text-5xl">Goerli testnet</h1>
-              <form className="flex gap-4" action="">
-                <input
-                  type="text"
-                  name=""
-                  id=""
-                  placeholder="enter account address"
-                  className="border-2 rounded-lg p-2"
-                />
-                <button className="border-2 border-black rounded-lg text-xl p-2">
-                  Send ETH
-                </button>
-              </form>
-            </div>
-            <div className="flex justify-around w-full">
-              <h1 className="text-5xl">Polygon testnet</h1>
-              <form className="flex gap-4" action="">
-                <input
-                  type="text"
-                  name=""
-                  id=""
-                  placeholder="enter account address"
-                  className="border-2 rounded-lg p-2"
-                />
-                <button className="border-2 border-black rounded-lg text-xl p-2">
-                  Send Matic
-                </button>
-              </form>
-            </div>
-          </div> */}
+
           {isFormVisible ? (
             <Form
               isFormVisible={isFormVisible}
@@ -365,7 +396,12 @@ const Userwallet = () => {
           )}
 
           {passwordVisible ? (
-            <Password setPasswordVisible={setPasswordVisible} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} selectedPrivateKey={selectedPrivateKey} />
+            <Password
+              setPasswordVisible={setPasswordVisible}
+              isModalOpen={isModalOpen}
+              setIsModalOpen={setIsModalOpen}
+              selectedPrivateKey={selectedPrivateKey}
+            />
           ) : (
             ""
           )}
@@ -378,8 +414,15 @@ const Userwallet = () => {
           ) : (
             ""
           )}
-          
-          {openDeleteBox?(<DeleteModal setopenDeleteBox={setopenDeleteBox} publickey={accountData.Public_key} />):("")}
+
+          {openDeleteBox ? (
+            <DeleteModal
+              setopenDeleteBox={setopenDeleteBox}
+              publickey={accountData.Public_key}
+            />
+          ) : (
+            ""
+          )}
         </div>
       ) : (
         <div className="h-[550px] w-[550px] border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
@@ -394,7 +437,10 @@ const Userwallet = () => {
           </button>
 
           {passwordVisible ? (
-            <Password setPasswordVisible={setPasswordVisible} selectedPrivateKey={selectedPrivateKey} />
+            <Password
+              setPasswordVisible={setPasswordVisible}
+              selectedPrivateKey={selectedPrivateKey}
+            />
           ) : (
             ""
           )}

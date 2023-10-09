@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { userPassword } from "../redux/features/SetPassword";
 import { LockAccount, unLockAccount } from "../redux/features/LockUnlock";
 import Popup from "./PrivatekeyPopup";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPrivateKey}) => {
   const [newPassword, setPassword] = useState();
@@ -29,7 +31,7 @@ const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPri
       dispatch(unLockAccount(true));
       setPasswordVisible(false);
     } else {
-      console.log("Enter valid password");
+      toast("Enter valid password");
       console.error();
     }
   };
@@ -61,7 +63,7 @@ const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPri
                 onSubmit={set_password}
               >
                 <input
-                  type="text"
+                  type="password"
                   name=""
                   id=""
                   placeholder="Enter Password"

@@ -2,6 +2,9 @@ import { React, useState } from "react";
 import { useSelector } from "react-redux";
 import { AiOutlineCloseSquare } from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
+import { FaRegCheckCircle } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Popup = ({ isModalOpen, setIsModalOpen, privateKey }) => {
   const Account = useSelector((state) => state.acc.acc1.value);
@@ -17,7 +20,10 @@ const Popup = ({ isModalOpen, setIsModalOpen, privateKey }) => {
     const text = privateKey;
     navigator.clipboard
       .writeText(text)
-      .then(() => setCopied(true))
+      .then(() => {
+        setCopied(true);
+        toast("Text copid!!");
+      })
       .catch((error) => console.log(error));
   };
 
@@ -38,7 +44,15 @@ const Popup = ({ isModalOpen, setIsModalOpen, privateKey }) => {
               <p className="flex justify-between gap-3">
                 <span className="flex breal-all gap-3">{privateKey}</span>
                 <span>
-                  <FaRegCopy className="text-xl" onClick={copy_text} />
+                  {copied ? (
+                    <FaRegCheckCircle
+                      className="text-xl"
+                      fill="green"
+                      onClick={copy_text}
+                    />
+                  ) : (
+                    <FaRegCopy className="text-xl" onClick={copy_text} />
+                  )}
                 </span>
               </p>
             </div>
