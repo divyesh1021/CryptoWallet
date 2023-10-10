@@ -4,21 +4,23 @@ import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { Hourglass } from "react-loader-spinner";
 import TrasactionHash from "./TrasactionHash";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { Blocks } from "react-loader-spinner";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ethers = require("ethers");
 
 const Transaction = ({
+  HashLink,
+  networkProvider,
   setTransaction,
-  handleButtonClick,
-  // Account,
   selectedPublickey,
   selectedPrivateKey,
 }) => {
-  const provider = new ethers.providers.JsonRpcProvider(
-    "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f"
-  );
+  console.log("=-=-=-=-=-=-=-=-=-=-=-=-=-=-",HashLink);
+  const provider = new ethers.providers.JsonRpcProvider(networkProvider);
+
+  console.log("provider==================================", provider);
 
   const Account = useSelector((state) => state.acc.acc1?.value);
 
@@ -29,9 +31,10 @@ const Transaction = ({
     Private_key: "",
     mnemonic: "",
   });
-  const [HashModal,setHashModal] = useState(false);
-  const [Hash,setHash] = useState("");
+  const [HashModal, setHashModal] = useState(false);
+  const [Hash, setHash] = useState("");
   const [loading, setLoading] = useState(false);
+  const [AddressLoading, setAddressLoading] = useState("");
 
   const wallet = new ethers.Wallet(selectedPrivateKey, provider);
 
@@ -53,6 +56,8 @@ const Transaction = ({
       const account = Account[accountIndex];
 
       try {
+        setAddressLoading(true);
+
         const balance = await provider.getBalance(account.Public_key);
         const balanceInEther = ethers.utils.parseEther(balance.toString());
 
@@ -62,6 +67,7 @@ const Transaction = ({
           mnemonic: account.mnemonic,
           balance: balanceInEther,
         });
+        setAddressLoading(false);
         console.log("setAccountData 999999999", balanceInEther);
       } catch (error) {
         console.error("Error fetching balance:", error);
@@ -79,16 +85,21 @@ const Transaction = ({
       const tx = await wallet.sendTransaction({
         to: accountData.Public_key,
         value: ethers.utils.parseEther(amount.toString()),
+        gasPrice: ethers.utils.parseUnits("5", "gwei"),
+        gasLimit: 21000,
       });
       await tx.wait();
       setLoading(false);
       setHashModal(true);
-      setHash(tx.hash);
+      const H = `${HashLink}${tx.hash}`
+      setHash(H);
       toast("Transaction successfully");
     } catch (error) {
       console.log(error);
     }
   };
+
+  console.log("hash=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-",Hash);
 
   return (
     <>
@@ -138,7 +149,11 @@ const Transaction = ({
               ) : ( */}
                 <div className="flex flex-col gap-4">
                   <p className="border-2 rounded-xl p-3 ">
-                    To : {accountData?.Public_key}
+                    {AddressLoading ? (
+                      <Blocks borderColor="" width="60" height="30" />
+                    ) : (
+                      `To : ${accountData?.Public_key}`
+                    )}
                   </p>
                   <p className="border-2 rounded-xl p-3">
                     From : {selectedPublickey}
@@ -189,7 +204,11 @@ const Transaction = ({
             </div>
           </div>
         )}
-        {HashModal ? (<TrasactionHash Hash={Hash} setHashModal={setHashModal}/>):("")}
+        {HashModal ? (
+          <TrasactionHash Hash={Hash} networkHashLink={HashLink} setHashModal={setHashModal} />
+        ) : (
+          ""
+        )}
       </div>
     </>
   );

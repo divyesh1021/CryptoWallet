@@ -5,8 +5,10 @@ const TrasactionHash = ({ Hash, setHashModal }) => {
         setHashModal(false);
     }
 
-    const HashLink = `https://sepolia.etherscan.io/tx/${Hash}`;
-    console.log(HashLink);
+    // const HashLink = `${Hash}`;
+    // console.log(HashLink);
+
+    // console.log("networkHashLink====================>>>>>>>>",networkHashLink);
 
   return (
     <>
@@ -19,7 +21,7 @@ const TrasactionHash = ({ Hash, setHashModal }) => {
           <div className="flex flex-col gap-2">
             <h1>Transaction hash : {Hash}</h1>
             <p>Explor the transaction follow this link</p>
-            <a href={HashLink} target="_blank" rel="noopener noreferrer" className="underline hover:underline-offset-1 hover:text-blue-500">Explore Transaction</a>
+            <a href={Hash} target="_blank" rel="noopener noreferrer" className="underline hover:underline-offset-1 hover:text-blue-500">Explore Transaction</a>
           </div>
         </div>
       </div>

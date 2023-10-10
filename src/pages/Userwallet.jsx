@@ -7,21 +7,28 @@ import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 import { FaWallet } from "react-icons/fa";
 import { FaLock } from "react-icons/fa";
 import { FaEthereum } from "react-icons/fa";
+import { SiBinance } from "react-icons/si";
 import { FaRegCopy } from "react-icons/fa";
 import { FaTrashRestoreAlt } from "react-icons/fa";
 import { FaUnlock } from "react-icons/fa";
 import { FaRegCheckCircle } from "react-icons/fa";
 import { removeUser } from "../redux/features/userAcc";
+import { ThreeDots } from "react-loader-spinner";
+import { ProgressBar } from "react-loader-spinner";
+import { Blocks } from "react-loader-spinner";
 import Form from "../components/Recoverphase";
 import Popup from "../components/PrivatekeyPopup";
 import Transaction from "../components/Transaction";
 import DownloadPhase from "../components/DownloadPhase";
 import Password from "../components/Password";
 import DeleteModal from "../components/DeleteModal";
+import EthereumLogo from "../Asset/ethereum.ico";
+import BNBLogo from "../Asset/bnb.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ethers = require("ethers");
+const axios = require("axios");
 const bip39 = require("bip39");
 const Buffer = require("buffer");
 
@@ -31,7 +38,7 @@ const Userwallet = () => {
   const recoverData = location.state?.data || null;
 
   const [selectedOption, setSelectedOption] = useState("Account 1");
-  const [chainNetwork,setChainNetwork] = useState("");
+  const [chainNetwork, setChainNetwork] = useState("");
   const [accountData, setAccountData] = useState({
     Public_key: "",
     Private_key: "",
@@ -49,31 +56,41 @@ const Userwallet = () => {
   const [newAccount, setNewAccount] = useState({});
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [openDeleteBox, setopenDeleteBox] = useState(false);
+  const [BalanceLoading, setBalanceLoading] = useState(false);
+  const [AddressLoading, setAddressLoading] = useState(false);
+  const [networkProvider, setNetworkProvider] = useState("");
+  const [HashLink, setHashLink] = useState("");
+  const [History, setHistory] = useState([]);
 
   const Network = [
     {
       Network_Name: "Ethereum Testnet",
       Network_Provider:
         "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f",
+      Explore_Hash: "https://sepolia.etherscan.io/tx/",
     },
     {
       Network_Name: "Binance Testnet",
-      Network_Provider:"https://data-seed-prebsc-1-s1.binance.org:8545/",
-    }
+      Network_Provider: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+      Explore_Hash: "https://testnet.bscscan.com/tx/",
+    },
   ];
 
-  const provider = new ethers.providers.JsonRpcProvider(
-    "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f"
-  );
+  // const provider = new ethers.providers.JsonRpcProvider(
+  //   "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f"
+  // );
 
   // const provider = new ethers.providers.JsonRpcProvider(
   //   "https://data-seed-prebsc-1-s1.binance.org:8545/"
   // );
 
-  const data = Network?.filter((el) => el.Network_Name === chainNetwork);
-  console.log("daay90-0========",data);
-
-  // const provider = new ethers.providers.JsonRpcProvider(data.Network_Provider);
+  // try {
+  //   const data = Network?.filter((el) => el.Network_Name === chainNetwork);
+  //   const selected_provider = data[0].Network_Provider;
+  //   const provider = new ethers.providers.JsonRpcProvider(selected_provider);
+  // } catch (error) {
+  //   console.log("select your network");
+  // }
 
   // const handleButtonClick = () => {
   //   setFormVisibility(!isFormVisible);
@@ -100,9 +117,9 @@ const Userwallet = () => {
   useEffect(() => {
     // When the component first loads, set the default option and display its data
     handleDropdownChange({ target: { value: selectedOption } });
-    handleChangeChainNetwork({ target: { value: chainNetwork } })
+    handleChangeChainNetwork({ target: { value: chainNetwork } });
     // Get_Transaction();
-  }, []);
+  }, [chainNetwork]);
 
   console.log("getting", Account);
 
@@ -117,14 +134,18 @@ const Userwallet = () => {
   };
 
   const copy_text = () => {
-    const text = accountData.Public_key;
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        setCopied(true);
-        toast("Text copid!!");
-      })
-      .catch((error) => console.log(error));
+    try {
+      const text = accountData.Public_key;
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          setCopied(true);
+          toast("Text copid!!");
+        })
+        .catch((error) => console.log(error));
+    } catch (error) {
+      toast("please select network");
+    }
   };
 
   const handleTransaction = (publickey, privatekey) => {
@@ -137,13 +158,13 @@ const Userwallet = () => {
 
   const handleChangeChainNetwork = (event) => {
     const selectedChainNetwork = event.target.value;
-    console.log("selectedChainNetwork------->>>>>>>>",selectedChainNetwork);
+    console.log("selectedChainNetwork------->>>>>>>>", selectedChainNetwork);
     setChainNetwork(selectedChainNetwork);
-  }
+  };
 
   const handleDropdownChange = async (event) => {
     const selectedValue = event.target.value;
-    console.log("selectedValue------->>>>>>>>",selectedValue);
+    console.log("selectedValue------->>>>>>>>", selectedValue);
     setSelectedOption(selectedValue);
 
     if (selectedValue.startsWith("Account ")) {
@@ -153,15 +174,27 @@ const Userwallet = () => {
       const account = Account[accountIndex];
 
       try {
+        const data = Network?.filter((el) => el.Network_Name === chainNetwork);
+        const selected_provider = data[0].Network_Provider;
+        const hash = data[0].Explore_Hash;
+        setNetworkProvider(selected_provider);
+        // console.log("hash-------------000000000000000",hash);
+        setHashLink(hash);
+        const provider = new ethers.providers.JsonRpcProvider(
+          selected_provider
+        );
+        setBalanceLoading(true);
+        setAddressLoading(true);
         const balance = await provider.getBalance(account.Public_key);
         const balanceInEther = ethers.utils.formatEther(balance);
-
+        setBalanceLoading(false);
         setAccountData({
           Public_key: account.Public_key,
           Private_key: account.Private_key,
           mnemonic: account.mnemonic,
           balance: balanceInEther,
         });
+        setAddressLoading(false);
         console.log("setAccountData 999999999", accountData);
       } catch (error) {
         console.error("Error fetching balance:", error);
@@ -230,14 +263,32 @@ const Userwallet = () => {
     }
   };
 
-  console.log("Account------------->>>>>>>>.", Account[0].mnemonic);
+  const Transaction_history = async () => {
+    await axios
+      .get(
+        `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${accountData?.Public_key}&api-key=a000e9d4c4a84f2da055fd797eab742f`
+      )
+      .then((response) => {
+        const transactions = response.data.result;
+        const transactionHistory = transactions.map((tx) => ({
+          From: tx.from,
+          To: tx.to,
+          value: tx.value,
+        }));
+        setHistory(transactionHistory);
+      });
+  };
 
-  console.log("chainNetwork------------->>>>>>>>.",Network[0].Network_Name);
+  // console.log("Account------------->>>>>>>>.", Account[0].mnemonic);
 
-
+  console.log(
+    "chainNetwork-accountData------------>>>>>>>>.",
+    Network[0].Network_img
+  );
 
   return (
     <>
+      {/* <img src={Network[0].Network_img} alt="" /> */}
       {handlelock ? (
         // <div className="h-[550px] border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
         <div className="flex flex-col gap-5 container mx-auto  border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
@@ -248,7 +299,7 @@ const Userwallet = () => {
             >
               <span className="flex gap-2 items-center">
                 <FaWallet className="text-lg" />
-                ADD Wallet
+                ADD Account
               </span>
             </button>
             <button
@@ -278,90 +329,155 @@ const Userwallet = () => {
               className="border-2 rounded-lg text-xl p-2 w-auto"
             >
               <option value="">Select Chain</option>
-              {Network.map((value, index) => (
-                <option key={index} value={value.Network_Name}>
-                  {value.Network_Name}
-                </option>
-              ))}
+              {Network &&
+                Network.map((value, index) => (
+                  <>
+                    <option key={index} value={value.Network_Name}>
+                      {value.Network_Name}
+                    </option>
+                  </>
+                ))}
             </select>
           </div>
-          <div className="flex flex-col justify-center py-10 gap-5">
-            <select
-              value={selectedOption}
-              onChange={handleDropdownChange}
-              className="border-2 rounded-lg text-xl p-2 w-auto"
-            >
-              <option value="">Select an option</option>
-              {Account.map((_, index) => (
-                <option key={index} value={`Account ${index + 1}`}>
-                  {`Account ${index + 1}`}
-                </option>
-              ))}
-              {/* <option value="generate">Generate Account</option>
-              <option value="recover">Recover Account</option> */}
-            </select>
-            {/* {selectedOption === "generate" || selectedOption === "recover" ? (
-              <button
-                className="border-2 rounded-lg text-xl p-2 w-auto"
-                onClick={handleButtonClick}
-              >
-                {selectedOption === "generate"
-                  ? "Generate Account"
-                  : "Recover Account"}  
-              </button>
-            ) : ( */}
-            <div className="flex flex-col gap-4">
-              <p className="flex justify-between border-2 rounded-xl p-3 bg-blue-300 gap-3">
-                <span className="flex gap-2 break-all">
-                  <FaEthereum className="text-2xl" />
-                  {accountData.Public_key}
-                </span>
-                <span>
-                  {copied ? (
-                    <FaRegCheckCircle
-                      className="text-xl"
-                      fill="green"
-                      onClick={copy_text}
-                    />
+          {/* <img src={EthereumLogo} alt="" /> */}
+          {chainNetwork === "" ? (
+            ""
+          ) : (
+            <>
+              <div className="flex flex-col justify-center py-10 gap-5">
+                <select
+                  value={selectedOption}
+                  onChange={handleDropdownChange}
+                  className="border-2 rounded-lg text-xl p-2 w-auto"
+                >
+                  <option value="">Select an option</option>
+                  {Account.map((_, index) => (
+                    <option key={index} value={`Account ${index + 1}`}>
+                      {`Account ${index + 1}`}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex flex-col gap-4">
+                  {chainNetwork === "" ? (
+                    ""
                   ) : (
-                    <FaRegCopy className="text-xl" onClick={copy_text} />
+                    <>
+                      <p className="flex justify-between border-2 rounded-xl p-3 bg-blue-300 gap-3">
+                        <span className="flex gap-2 break-all">
+                          {AddressLoading ? (
+                            <Blocks borderColor="" width="60" height="25" />
+                          ) : (
+                            <span className="flex gap-2">
+                              {chainNetwork === "Ethereum Testnet" ? (
+                                <>
+                                  <FaEthereum className="text-2xl" />
+                                </>
+                              ) : chainNetwork === "Binance Testnet" ? (
+                                <SiBinance className="text-2xl" />
+                              ) : (
+                                ""
+                              )}
+                              {accountData?.Public_key}
+                            </span>
+                          )}
+                        </span>
+                        <span>
+                          {copied ? (
+                            <FaRegCheckCircle
+                              className="text-xl"
+                              fill="green"
+                              onClick={copy_text}
+                            />
+                          ) : (
+                            <FaRegCopy
+                              className="text-xl"
+                              onClick={copy_text}
+                            />
+                          )}
+                        </span>
+                      </p>
+
+                      <div className="flex justify-center text-xl font-medium">
+                        {BalanceLoading ? (
+                          <ThreeDots className="" height="18" color="black" />
+                        ) : (
+                          <span>
+                            {chainNetwork === "Ethereum Testnet" ? (
+                              <div className="flex items-center gap-2">
+                                <span>Balance : {accountData?.balance}</span>
+                                ETH
+                                {/* <FaEthereum className="text-2xl" /> */}
+                              </div>
+                            ) : chainNetwork === "Binance Testnet" ? (
+                              <div className="flex items-center gap-2">
+                                <span>Balance : {accountData?.balance}</span>
+                                BNB
+                                {/* <SiBinance
+                                  fill="#F3BA2F"
+                                  className="text-2xl"
+                                /> */}
+                              </div>
+                            ) : (
+                              ""
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      <button className="text-lg font-semibold">
+                        <span className="flex justify-center">
+                          <BsFillArrowUpRightCircleFill
+                            className="text-center text-4xl"
+                            fill="rgb(96 165 250)"
+                            onClick={() =>
+                              handleTransaction(
+                                accountData.Public_key,
+                                accountData.Private_key
+                              )
+                            }
+                          />
+                        </span>
+                        send
+                      </button>
+                      <button
+                        className="border-2 rounded-xl p-3"
+                        onClick={() =>
+                          unlockPrivatekey(accountData.Private_key)
+                        }
+                      >
+                        Export Private_key
+                      </button>
+                      <button
+                        className="border-2 rounded-xl p-3"
+                        // onClick={() => Delete_Account(accountData.Public_key)}
+                        onClick={handleDelete}
+                      >
+                        Delete Account
+                      </button>
+                      <div className="flex flex-col justify-center items-center gap-3">
+                        <h1 className="text-xl font-semibold">
+                          Account history
+                        </h1>
+                        <table className="border border-gray-200 w-full">
+                          <thead>
+                            <tr>
+                              <th className="">From</th>
+                              <th className="">To</th>
+                              <th className="">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
-                </span>
-              </p>
-              <h1 className="text-xl font-bold text-center">
-                Balance: {accountData.balance} ETH
-              </h1>
-              <button className="text-lg font-semibold">
-                <span className="flex justify-center">
-                  <BsFillArrowUpRightCircleFill
-                    className="text-center text-4xl"
-                    fill="rgb(96 165 250)"
-                    onClick={() =>
-                      handleTransaction(
-                        accountData.Public_key,
-                        accountData.Private_key
-                      )
-                    }
-                  />
-                </span>
-                send
-              </button>
-              <button
-                className="border-2 rounded-xl p-3"
-                onClick={() => unlockPrivatekey(accountData.Private_key)}
-              >
-                Export Private_key
-              </button>
-              <button
-                className="border-2 rounded-xl p-3"
-                // onClick={() => Delete_Account(accountData.Public_key)}
-                onClick={handleDelete}
-              >
-                Delete Account
-              </button>
-            </div>
-            {/* )} */}
-          </div>
+                </div>
+              </div>
+            </>
+          )}
 
           {isFormVisible ? (
             <Form
@@ -385,9 +501,9 @@ const Userwallet = () => {
 
           {openTransaction ? (
             <Transaction
+              HashLink={HashLink}
+              networkProvider={networkProvider}
               setTransaction={setTransaction}
-              handleButtonClick={handleButtonClick}
-              Account={Account}
               selectedPrivateKey={selectedPrivateKey}
               selectedPublickey={selectedPublickey}
             />
