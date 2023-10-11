@@ -22,13 +22,14 @@ import Transaction from "../components/Transaction";
 import DownloadPhase from "../components/DownloadPhase";
 import Password from "../components/Password";
 import DeleteModal from "../components/DeleteModal";
+import ShowAddress from "../components/TransactionHistoryData";
 import EthereumLogo from "../Asset/ethereum.ico";
 import BNBLogo from "../Asset/bnb.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-const ethers = require("ethers");
-const axios = require("axios");
+import axios from "axios";
+import { ethers } from "ethers";
+// const ethers = require("ethers");
 const bip39 = require("bip39");
 const Buffer = require("buffer");
 
@@ -46,7 +47,6 @@ const Userwallet = () => {
   });
   const [isFormVisible, setFormVisibility] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [accountBalances, setAccountBalances] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPrivateKey, setSelectedPrivateKey] = useState("");
   const [selectedPublickey, setSelectedPublickey] = useState("");
@@ -61,6 +61,7 @@ const Userwallet = () => {
   const [networkProvider, setNetworkProvider] = useState("");
   const [HashLink, setHashLink] = useState("");
   const [History, setHistory] = useState([]);
+  const [API, setAPI] = useState("");
 
   const Network = [
     {
@@ -68,11 +69,14 @@ const Userwallet = () => {
       Network_Provider:
         "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f",
       Explore_Hash: "https://sepolia.etherscan.io/tx/",
+      Network_API:
+        "https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=YOUR_ADDRESS_HERE&api-key=1b852b584c7b438589e7406db62a9e99",
     },
     {
       Network_Name: "Binance Testnet",
       Network_Provider: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       Explore_Hash: "https://testnet.bscscan.com/tx/",
+      Network_API: "Network_API",
     },
   ];
 
@@ -99,29 +103,28 @@ const Userwallet = () => {
   const handlelock = useSelector((state) => state.acc.auth.check);
   const GetPassword = useSelector((state) => state.acc.pwd.password);
   const dispatch = useDispatch();
-  console.log("GetPassword------->>>>>>>", GetPassword);
 
   const handleLock = () => {
     setPasswordVisible(true);
-    // dispatch(LockAccount(false));
   };
 
   const handleUnlock = () => {
     setPasswordVisible(true);
-    // dispatch(unLockAccount(true));
   };
 
   const Account = useSelector((state) => state.acc.acc1?.value);
-  // const dispatch = useDispatch();
 
   useEffect(() => {
     // When the component first loads, set the default option and display its data
     handleDropdownChange({ target: { value: selectedOption } });
     handleChangeChainNetwork({ target: { value: chainNetwork } });
-    // Get_Transaction();
   }, [chainNetwork]);
 
-  console.log("getting", Account);
+  useEffect(() => {
+    if (accountData) {
+      Transaction_history();
+    }
+  }, [accountData]);
 
   const handlePrivatekey = (privateKey) => {
     setSelectedPrivateKey(privateKey);
@@ -154,27 +157,34 @@ const Userwallet = () => {
     setSelectedPrivateKey(privatekey);
   };
 
-  console.log(openTransaction);
+  // console.log(openTransaction);
 
   const handleChangeChainNetwork = (event) => {
     const selectedChainNetwork = event.target.value;
-    console.log("selectedChainNetwork------->>>>>>>>", selectedChainNetwork);
+    // console.log("selectedChainNetwork------->>>>>>>>", selectedChainNetwork);
     setChainNetwork(selectedChainNetwork);
   };
 
   const handleDropdownChange = async (event) => {
     const selectedValue = event.target.value;
-    console.log("selectedValue------->>>>>>>>", selectedValue);
+    // console.log("selectedValue------->>>>>>>>", selectedValue);
     setSelectedOption(selectedValue);
 
     if (selectedValue.startsWith("Account ")) {
-      console.log("selectedValue-----------------", selectedValue);
+      // console.log("selectedValue-----------------", selectedValue);
       const accountIndex = parseInt(selectedValue.replace("Account ", "")) - 1;
-      console.log("-----------------", accountIndex);
+      // console.log("-----------------", accountIndex);
       const account = Account[accountIndex];
 
       try {
         const data = Network?.filter((el) => el.Network_Name === chainNetwork);
+        const getTransactionAPI = data[0].Network_API;
+        // const add = "12465165";
+        // const api_url = getTransactionAPI.replace("YOUR_ADDRESS_HERE",add);
+        console.log("getTransactionAPI---------", getTransactionAPI);
+        setAPI(getTransactionAPI);
+        // console.log("api_url---------",api_url);
+
         const selected_provider = data[0].Network_Provider;
         const hash = data[0].Explore_Hash;
         setNetworkProvider(selected_provider);
@@ -195,7 +205,8 @@ const Userwallet = () => {
           balance: balanceInEther,
         });
         setAddressLoading(false);
-        console.log("setAccountData 999999999", accountData);
+        // Transaction_history();
+        // console.log("setAccountData 999999999", accountData);
       } catch (error) {
         console.error("Error fetching balance:", error);
         setAccountData(null); // Clear the data if there's an error
@@ -209,15 +220,15 @@ const Userwallet = () => {
 
     // Get the mnemonic (recovery phrase)
     const mnemonic = bip39.generateMnemonic();
-    console.log("mnemonic", mnemonic);
+    // console.log("mnemonic", mnemonic);
 
     // Create a new random wallet
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
     const Private_key = wallet.privateKey;
     const Public_key = wallet.address;
 
-    console.log("Privatekey :", wallet.privateKey);
-    console.log("public key :", wallet.address);
+    // console.log("Privatekey :", wallet.privateKey);
+    // console.log("public key :", wallet.address);
 
     const Acc = {
       mnemonic: mnemonic,
@@ -246,7 +257,7 @@ const Userwallet = () => {
   };
 
   const Delete_Account = (id) => {
-    console.log("fdggfjjhjk", id);
+    // console.log("fdggfjjhjk", id);
     dispatch(removeUser(id));
     window.location.reload();
   };
@@ -264,33 +275,33 @@ const Userwallet = () => {
   };
 
   const Transaction_history = async () => {
-    await axios
-      .get(
-        `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${accountData?.Public_key}&api-key=a000e9d4c4a84f2da055fd797eab742f`
-      )
-      .then((response) => {
-        const transactions = response.data.result;
-        const transactionHistory = transactions.map((tx) => ({
-          From: tx.from,
-          To: tx.to,
-          value: tx.value,
-        }));
-        setHistory(transactionHistory);
-      });
+    // console.log("accountData==========>>>>>>>", accountData);
+    // console.log("API_URL",API);
+    const base_api = API.replace("YOUR_ADDRESS_HERE", accountData?.Public_key);
+    // console.log(base_api);
+    // const base_api = `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${accountData?.Public_key}&api-key=1b852b584c7b438589e7406db62a9e99`;
+    try {
+      const response = await axios.get(base_api);
+      const transactions = response.data.result;
+      if (Array.isArray(transactions)) {
+        console.log("------------------------", transactions);
+        setHistory(transactions);
+      } else {
+        console.error("API response is not an array:", transactions);
+      }
+
+      setHistory(transactions);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  // console.log("Account------------->>>>>>>>.", Account[0].mnemonic);
-
-  console.log(
-    "chainNetwork-accountData------------>>>>>>>>.",
-    Network[0].Network_img
-  );
+  console.log("History.............", typeof History);
 
   return (
     <>
       {/* <img src={Network[0].Network_img} alt="" /> */}
       {handlelock ? (
-        // <div className="h-[550px] border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
         <div className="flex flex-col gap-5 container mx-auto  border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
           <div className="flex justify-around font-normal gap-2 flex-wrap flex-col 2xl:flex-row xl:flex-row lg:flex-row">
             <button
@@ -453,10 +464,12 @@ const Userwallet = () => {
                       >
                         Delete Account
                       </button>
-                      <div className="flex flex-col justify-center items-center gap-3">
+                      <ShowAddress History={History} />
+                      {/* <div className="flex flex-col justify-center items-center gap-3">
                         <h1 className="text-xl font-semibold">
                           Account history
                         </h1>
+
                         <table className="border border-gray-200 w-full">
                           <thead>
                             <tr>
@@ -466,12 +479,17 @@ const Userwallet = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            <tr>
-                              <td></td>
-                            </tr>
+                            {History &&
+                              History?.map((item) => (
+                                <tr>
+                                  <td onMouseEnter={()=>setShowFullAddress(true)} onMouseLeave={()=>setShowFullAddress(false)}>{showFullAddress ? <ShowAddress/> :(item.from).substring(0,8)}</td>
+                                  <td>{(item.to).substring(0,8)}</td>
+                                  <td>{item.value}</td>
+                                </tr>
+                              ))}
                           </tbody>
                         </table>
-                      </div>
+                      </div> */}
                     </>
                   )}
                 </div>
@@ -567,3 +585,7 @@ const Userwallet = () => {
 };
 
 export default Userwallet;
+
+
+
+// https://api-testnet.bscscan.com/api?module=account&action=balancemulti&address=0x3f349bBaFEc1551819B8be1EfEA2fC46cA749aA1,0xEadaBd3A52f0F008E1d84eEA0b597d458EA9Fe69,0x70F657164e5b75689b64B7fd1fA275F334f28e18&tag=latest&apikey=SPFYW27G38Y7F1HHP1WV2P5E26PTFA6BEV
