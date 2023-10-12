@@ -15,7 +15,7 @@ const RecoverAccount = () => {
 
   const Import_account = async () => {
     dispatch(userAccount(dataReceived));
-    toast("Account Imported Successfully");
+    toast.success("Account Imported Successfully");
     // setTimeout(()=>navigate("/"),5000);
     navigate("/");
   }

@@ -1,16 +1,25 @@
-import React from "react";
+import {React,useState} from "react";
 import { AiOutlineCloseSquare } from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
+import { FaRegCheckCircle } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const DownloadPhase = ({ setDownloadPhase, newAccount }) => {
+const DownloadPhase = ({ setDownloadPhase, newAccount, setAddWalletModal }) => {
+  const [copied, setCopied] = useState(false);
+
   const handleClose = () => {
     setDownloadPhase(false);
+    setAddWalletModal(false);
   };
   console.log("newAccount-->>", newAccount.mnemonic);
 
   const copy_text = () => {
     const text = newAccount.mnemonic;
     navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(()=>setCopied(false),6000)
+    toast.success("copied!!");
   };
 
   const downloadTextAsFile = () => {
@@ -28,6 +37,7 @@ const DownloadPhase = ({ setDownloadPhase, newAccount }) => {
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
     setDownloadPhase(false);
+    setAddWalletModal(false);
   };
 
   return (
@@ -50,7 +60,15 @@ const DownloadPhase = ({ setDownloadPhase, newAccount }) => {
                   {newAccount.mnemonic}
                 </span>
                 <span>
-                  <FaRegCopy className="text-xl" onClick={copy_text} />
+                {copied ? (
+                    <FaRegCheckCircle
+                      className="text-xl"
+                      fill="green"
+                      onClick={copy_text}
+                    />
+                  ) : (
+                    <FaRegCopy className="text-xl" onClick={copy_text} />
+                  )}
                 </span>
               </p>
             </div>

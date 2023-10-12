@@ -22,7 +22,8 @@ const Popup = ({ isModalOpen, setIsModalOpen, privateKey }) => {
       .writeText(text)
       .then(() => {
         setCopied(true);
-        toast("Text copid!!");
+        setTimeout(()=>setCopied(false),6000);
+        toast.success("copied!!");
       })
       .catch((error) => console.log(error));
   };

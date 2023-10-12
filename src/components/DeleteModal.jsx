@@ -6,7 +6,7 @@ import { Vortex } from "react-loader-spinner";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const DeleteModal = ({ setopenDeleteBox, publickey }) => {
+const DeleteModal = ({ setopenDeleteBox, publickey, setSelectedOption }) => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [checkPassword, setCheckPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,10 +27,15 @@ const DeleteModal = ({ setopenDeleteBox, publickey }) => {
       Enter_Password();
     } else {
       // console.log("fdggfjjhjk", id);
-      setLoading(true);
+      // setLoading(true);
       dispatch(removeUser(id));
-      toast("Account deleted!!!");
-      setTimeout(() => window.location.reload(), 5000);
+      toast.success("Account deleted!!!");
+      // setTimeout(() => {
+        // setLoading(false);
+        setPasswordVisible(false);
+        setopenDeleteBox(false);
+      // }, 5000);
+      setSelectedOption("Select an option");
     }
   };
 

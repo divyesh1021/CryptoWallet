@@ -47,9 +47,9 @@ const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
       } catch (error) {
         setErrorVisible(true);
         if (phase == "") {
-          toast("Enter your mnmonic key!");
+          toast.warning("Enter your mnmonic key!");
         } else {
-          toast(
+          toast.warning(
             "Your mnmonic key is not curret, enter a valid mnmonic key"
           );
         }
@@ -70,7 +70,7 @@ const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
         sessionStorage.setItem("myData", JSON.stringify(sendRecoverData));
         window.location.href = "/recoveraccount";
       } catch (error) {
-        toast("Enter a valid mnmonic key")
+        toast.error("Enter a valid mnmonic key")
       }
     }
   };

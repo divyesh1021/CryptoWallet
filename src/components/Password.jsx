@@ -31,7 +31,7 @@ const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPri
       dispatch(unLockAccount(true));
       setPasswordVisible(false);
     } else {
-      toast("Enter valid password");
+      toast.error("Enter valid password");
       console.error();
     }
   };

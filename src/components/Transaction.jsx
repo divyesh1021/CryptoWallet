@@ -93,7 +93,7 @@ const Transaction = ({
       setHashModal(true);
       const H = `${HashLink}${tx.hash}`
       setHash(H);
-      toast("Transaction successfully");
+      toast.success("Transaction successfully");
     } catch (error) {
       console.log(error);
     }

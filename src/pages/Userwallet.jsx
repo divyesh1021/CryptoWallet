@@ -17,6 +17,7 @@ import { ThreeDots } from "react-loader-spinner";
 import { ProgressBar } from "react-loader-spinner";
 import { Blocks } from "react-loader-spinner";
 import Form from "../components/Recoverphase";
+import AddAccount from "../components/AddAccount";
 import Popup from "../components/PrivatekeyPopup";
 import Transaction from "../components/Transaction";
 import DownloadPhase from "../components/DownloadPhase";
@@ -27,7 +28,7 @@ import EthereumLogo from "../Asset/ethereum.ico";
 import BNBLogo from "../Asset/bnb.png";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
+import axios, { getAdapter } from "axios";
 import { ethers } from "ethers";
 // const ethers = require("ethers");
 const bip39 = require("bip39");
@@ -39,7 +40,7 @@ const Userwallet = () => {
   const recoverData = location.state?.data || null;
 
   const [selectedOption, setSelectedOption] = useState("Account 1");
-  const [chainNetwork, setChainNetwork] = useState("");
+  const [chainNetwork, setChainNetwork] = useState("Ethereum Testnet");
   const [accountData, setAccountData] = useState({
     Public_key: "",
     Private_key: "",
@@ -47,6 +48,7 @@ const Userwallet = () => {
   });
   const [isFormVisible, setFormVisibility] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [AddWalletModal,setAddWalletModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPrivateKey, setSelectedPrivateKey] = useState("");
   const [selectedPublickey, setSelectedPublickey] = useState("");
@@ -59,8 +61,10 @@ const Userwallet = () => {
   const [BalanceLoading, setBalanceLoading] = useState(false);
   const [AddressLoading, setAddressLoading] = useState(false);
   const [networkProvider, setNetworkProvider] = useState("");
+  const [currency,setCurrency] = useState("");
   const [HashLink, setHashLink] = useState("");
   const [History, setHistory] = useState([]);
+  const [TransactionType,setTransactionType] = useState("");
   const [API, setAPI] = useState("");
 
   const Network = [
@@ -71,12 +75,15 @@ const Userwallet = () => {
       Explore_Hash: "https://sepolia.etherscan.io/tx/",
       Network_API:
         "https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=YOUR_ADDRESS_HERE&api-key=1b852b584c7b438589e7406db62a9e99",
+      Network_Currency: "ETH",
     },
     {
       Network_Name: "Binance Testnet",
       Network_Provider: "https://data-seed-prebsc-1-s1.binance.org:8545/",
       Explore_Hash: "https://testnet.bscscan.com/tx/",
-      Network_API: "Network_API",
+      Network_API:
+        "https://api-testnet.bscscan.com/api?module=account&action=txlist&address=YOUR_ADDRESS_HERE&tag=latest&apikey=SPFYW27G38Y7F1HHP1WV2P5E26PTFA6BEV",
+      Network_Currency: "BNB",
     },
   ];
 
@@ -131,6 +138,10 @@ const Userwallet = () => {
     setIsModalOpen(true);
   };
 
+  const Add_Address = () => {
+    setAddWalletModal(true);
+  }
+
   const unlockPrivatekey = (privateKey) => {
     setSelectedPrivateKey(privateKey);
     setPasswordVisible(true);
@@ -143,11 +154,12 @@ const Userwallet = () => {
         .writeText(text)
         .then(() => {
           setCopied(true);
-          toast("Text copid!!");
+          setTimeout(()=>setCopied(false),6000);
+          toast.success("copied!!");
         })
         .catch((error) => console.log(error));
     } catch (error) {
-      toast("please select network");
+      toast.error("please select network");
     }
   };
 
@@ -183,6 +195,7 @@ const Userwallet = () => {
         // const api_url = getTransactionAPI.replace("YOUR_ADDRESS_HERE",add);
         console.log("getTransactionAPI---------", getTransactionAPI);
         setAPI(getTransactionAPI);
+        setCurrency(data[0].Network_Currency);
         // console.log("api_url---------",api_url);
 
         const selected_provider = data[0].Network_Provider;
@@ -284,29 +297,49 @@ const Userwallet = () => {
       const response = await axios.get(base_api);
       const transactions = response.data.result;
       if (Array.isArray(transactions)) {
-        console.log("------------------------", transactions);
-        setHistory(transactions);
+        // console.log("------------------------", transactions);
+        const filter_transaction = transactions.reverse();
+        const latest_transaction = [];
+        for (let i = 0; i < 5; i++) {
+          if (filter_transaction[i] != undefined) {
+            console.log("accountData.Public_key------->>>>>>>>>>",accountData.Public_key);
+            console.log("filter_transaction[i].from------->>>>>>>>>>",filter_transaction[i].from);
+            const select_add = accountData.Public_key.toLowerCase();
+            const add = filter_transaction[i].from;
+            // console.log("Addddddddddddddd",add);
+            if(select_add===add){
+              console.log("inside if");
+              filter_transaction[i].Type = "send";
+            }
+            else{
+              console.log("outside if");
+              filter_transaction[i].Type = "receive";
+            }
+            // setTransactionType()
+            latest_transaction.push(filter_transaction[i]);
+          }
+        }
+        setHistory(latest_transaction);
       } else {
         console.error("API response is not an array:", transactions);
       }
 
-      setHistory(transactions);
+      // setHistory(transactions);
     } catch (error) {
       console.log(error);
     }
   };
 
-  console.log("History.............", typeof History);
+  console.log("History.............", History);
 
   return (
     <>
-      {/* <img src={Network[0].Network_img} alt="" /> */}
       {handlelock ? (
-        <div className="flex flex-col gap-5 container mx-auto  border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
+        <div className="h-[800px] overflow-y-scroll flex flex-col gap-5 container mx-auto  border-2 shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] rounded-xl p-8">
           <div className="flex justify-around font-normal gap-2 flex-wrap flex-col 2xl:flex-row xl:flex-row lg:flex-row">
             <button
               className="items-center border-2 rounded-xl p-2 text-lg"
-              onClick={get_account}
+              onClick={Add_Address}
             >
               <span className="flex gap-2 items-center">
                 <FaWallet className="text-lg" />
@@ -332,7 +365,7 @@ const Userwallet = () => {
               </span>
             </button>
           </div>
-          <div className="flex flex-col justify-center gap-5">
+          <div className="flex flex-col justify-center gap-3">
             <h1 className="text-xl font-medium">Select Your Chain</h1>
             <select
               value={chainNetwork}
@@ -355,7 +388,7 @@ const Userwallet = () => {
             ""
           ) : (
             <>
-              <div className="flex flex-col justify-center py-10 gap-5">
+              <div className="flex flex-col justify-center py-5 gap-5">
                 <select
                   value={selectedOption}
                   onChange={handleDropdownChange}
@@ -464,7 +497,7 @@ const Userwallet = () => {
                       >
                         Delete Account
                       </button>
-                      <ShowAddress History={History} />
+                      <ShowAddress History={History} HashLink={HashLink} currency={currency} accountData={accountData}/>
                       {/* <div className="flex flex-col justify-center items-center gap-3">
                         <h1 className="text-xl font-semibold">
                           Account history
@@ -496,6 +529,8 @@ const Userwallet = () => {
               </div>
             </>
           )}
+
+          {AddWalletModal ? (<AddAccount setAddWalletModal={setAddWalletModal}/>):("")}
 
           {isFormVisible ? (
             <Form
@@ -553,6 +588,7 @@ const Userwallet = () => {
             <DeleteModal
               setopenDeleteBox={setopenDeleteBox}
               publickey={accountData.Public_key}
+              setSelectedOption={setSelectedOption}
             />
           ) : (
             ""
@@ -585,7 +621,5 @@ const Userwallet = () => {
 };
 
 export default Userwallet;
-
-
 
 // https://api-testnet.bscscan.com/api?module=account&action=balancemulti&address=0x3f349bBaFEc1551819B8be1EfEA2fC46cA749aA1,0xEadaBd3A52f0F008E1d84eEA0b597d458EA9Fe69,0x70F657164e5b75689b64B7fd1fA275F334f28e18&tag=latest&apikey=SPFYW27G38Y7F1HHP1WV2P5E26PTFA6BEV
