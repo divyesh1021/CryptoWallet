@@ -35,3 +35,11 @@ In the project directory, you can run:
    ```bash
    
    git clone https://github.com/vinayahiwse/Dex-back.git
+
+
+
+1. Clone the repository:
+
+   ```bash
+   
+   git clone https://github.com/vinayahiwse/Dex-back.git
