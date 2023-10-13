@@ -12,10 +12,7 @@ dings from any internet-connected device. Here are some key features and aspects
 
 ![homePage](https://github.com/vinayahiwse/Dex-back/assets/147159484/36a814c0-3f04-4548-9e8d-74ee10cb6ba3)
 
-file:///home/empiric-u3/Pictures/Screenshots/abc.png
 
-
-file:///home/empiric-u3/Pictures/Screenshots/abc.png
 
 
 
