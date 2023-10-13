@@ -45,7 +45,6 @@ In the project directory, you can run:
 
 ## Lock Wallet
 
-file:///home/empiric-u3/Pictures/Screenshots/lockWallet.png
 
 
 
