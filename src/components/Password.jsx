@@ -51,7 +51,7 @@ const Password = ({
               />
             </div>
             <div className="flex flex-col gap-2 p-5">
-              <p>Using this password to unlock wallet</p>
+              <p>Enter Wallet Password</p>
               <form
                 action=""
                 className="flex flex-col gap-4"

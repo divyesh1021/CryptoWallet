@@ -43,7 +43,7 @@ const AddAccount = ({ setAddWalletModal }) => {
           <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
           <div className="flex flex-col z-50 p-2 bg-white rounded-lg shadow-2xl break-all mx-4">
             <div className="flex flex-col gap-3 w-full p-5">
-              <h1 className="text-blue-500">Are you sure add new account</h1>
+              <h1 className="text-blue-500">Are you sure you want to add new account</h1>
               <div className="flex justify-around">
                 <button
                   className="rounded-xl p-2 px-5 bg-green-500"

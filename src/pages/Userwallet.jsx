@@ -1,6 +1,5 @@
 import { React, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { userAccount } from "../redux/features/userAcc";
 import { LockAccount, unLockAccount } from "../redux/features/LockUnlock";
 import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 import {
@@ -25,6 +24,7 @@ import DeleteModal from "../components/DeleteModal";
 import ShowAddress from "../components/TransactionHistoryData";
 import axios from "axios";
 import { ethers } from "ethers";
+import { RotatingLines } from "react-loader-spinner";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -57,6 +57,7 @@ const Userwallet = () => {
   const [HashLink, setHashLink] = useState("");
   const [History, setHistory] = useState([]);
   const [API, setAPI] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const Network = [
     {
@@ -65,7 +66,7 @@ const Userwallet = () => {
         "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f",
       Explore_Hash: "https://sepolia.etherscan.io/tx/",
       Network_API:
-        "https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=YOUR_ADDRESS_HERE&api-key=1b852b584c7b438589e7406db62a9e99",
+        "https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=YOUR_ADDRESS_HERE&api-key=5978RP4BD9WHCWEHKMAH5FJRH9Z8EHVY9E",
       Network_Currency: "ETH",
     },
     {
@@ -96,12 +97,6 @@ const Userwallet = () => {
     handleDropdownChange({ target: { value: selectedOption } });
     handleChangeChainNetwork({ target: { value: chainNetwork } });
   }, [chainNetwork]);
-
-  useEffect(() => {
-    if (accountData) {
-      Transaction_history();
-    }
-  }, [accountData]);
 
   const Add_Address = () => {
     setAddWalletModal(true);
@@ -145,7 +140,7 @@ const Userwallet = () => {
 
     if (selectedValue.startsWith("Account ")) {
       const accountIndex = parseInt(selectedValue.replace("Account ", "")) - 1;
-      const account = Account[accountIndex];
+      const account = await Account[accountIndex];
 
       try {
         const data = Network?.filter((el) => el.Network_Name === chainNetwork);
@@ -196,9 +191,11 @@ const Userwallet = () => {
   };
 
   const Transaction_history = async () => {
+    // setInterval(()=>{});
     const base_api = API.replace("YOUR_ADDRESS_HERE", accountData?.Public_key);
 
     try {
+      setLoading(true);
       const response = await axios.get(base_api);
       const transactions = response.data.result;
       if (Array.isArray(transactions)) {
@@ -217,13 +214,24 @@ const Userwallet = () => {
           }
         }
         setHistory(latest_transaction);
-      } else {
-        console.error("API response is not an array:", transactions);
+        setLoading(false);
       }
+      // else {
+      //   console.error("API response is not an array:", transactions);
+      // }
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (accountData) {
+      //setInterval(() => Transaction_history(), 3000);
+      Transaction_history();
+    }
+  }, [accountData]);
+
+  console.log("liofjgiofjiufhgiud", loading);
 
   return (
     <>
@@ -382,12 +390,18 @@ const Userwallet = () => {
                       >
                         Delete Account
                       </button>
-                      <ShowAddress
-                        History={History}
-                        HashLink={HashLink}
-                        currency={currency}
-                        accountData={accountData}
-                      />
+                      {loading ? (
+                        <div className="flex justify-center">
+                        <RotatingLines />
+                        </div>
+                      ) : (
+                        <ShowAddress
+                          History={History}
+                          HashLink={HashLink}
+                          currency={currency}
+                          accountData={accountData}
+                        />
+                      )}
                     </>
                   )}
                 </div>
