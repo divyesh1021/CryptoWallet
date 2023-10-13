@@ -34,8 +34,8 @@ In the project directory, you can run:
 - **Backend** : 
 ```bash
 	npm i
-```bash
 
+## Run Project
 - **Frontend** :
 ```bash
 	npm start
