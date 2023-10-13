@@ -36,7 +36,4 @@ In the project directory, you can run:
 	npm i
 
 
-- **Frontend** : 
-```bash
-	npm start
   
