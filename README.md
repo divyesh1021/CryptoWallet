@@ -41,3 +41,7 @@ In the project directory, you can run:
    ```bash
    
    npm start
+
+## DashBoard
+
+![Home](https://github.com/divyesh1021/CryptoWallet/assets/123168821/ca1b19e5-ae58-4bfa-bcbf-67acc1d75dd2)
