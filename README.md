@@ -34,7 +34,7 @@ In the project directory, you can run:
 
    ```bash
    
-   npm i
+   npm install
 
 1. Run Project:
 
