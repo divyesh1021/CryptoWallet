@@ -7,6 +7,27 @@ A web cryptocurrency wallet is a convenient and accessible solution for managing
 2. Frontend Framework: JavaScript, React.js, Tailwind CSS
 3. DataStore: Redux
 
+# Features
+1. Create a New Account
+Users can easily create a new crypto account in just a few steps. This account serves as their digital wallet to store and manage cryptocurrencies securely.
+
+2. Delete Account
+Users have the option to delete their crypto account. Make sure to inform users about the implications of this action, as it permanently erases their account and its associated funds.
+
+3. Recover Account
+In case a user accidentally deletes their account, our wallet provides a recovery mechanism to help them regain access to their funds. Ensure you detail the recovery process, such as using a recovery phrase or other security measures.
+
+4. Lock and Unlock Account
+Users can lock and unlock their accounts as needed. Locking an account adds an extra layer of security to protect their assets.
+
+5. Transaction History
+Our wallet keeps a detailed history of all previous transactions. Users can easily view their transaction history, including date, time, transaction type (send or receive), and amount.
+
+6. Transfer and Receive Cryptocurrency
+Users can transfer cryptocurrency to other users by providing the recipient's wallet address. They can also receive cryptocurrency from others using their wallet address.
+
+
+
 ## Available Scripts
 
 In the project directory, you can run:
