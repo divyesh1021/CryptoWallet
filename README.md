@@ -28,7 +28,7 @@ Users can transfer cryptocurrency to other users by providing the recipient's wa
 
 
 
-## Available Scripts
+## Install python dependencies
 
 In the project directory, you can run:
 
