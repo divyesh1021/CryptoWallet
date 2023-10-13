@@ -1,51 +1,29 @@
 import { React, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import HandleError from "./HandleError";
 import { AiOutlineCloseSquare } from "react-icons/ai";
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ethers = require("ethers");
 
-const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
+const Recoverphase = ({ setFormVisibility }) => {
   const [phase, setPhase] = useState("");
-  // const [isFormVisible, setFormVisibility] = useState(true);
-  const [errorVisible, setErrorVisible] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const navigate = useNavigate();
 
   const Account = useSelector((state) => state.acc.acc1?.value);
-  console.log("Account+++++++++++", Account);
 
   const handleFormSubmit = () => {
     setFormVisibility(false);
   };
 
-  console.log("phase", phase);
-
-  // const handleCloseError = () => {
-  //   setClose(false);
-  // };
-
   const RecoverAccount = (e) => {
     e.preventDefault();
-    const recover_phase = phase;
-    // console.log(phase)
-    // const data = Account?.filter((el) => el.memonic === state return el)
     const data = Account?.filter((el) => el.mnemonic === phase);
 
-    //console.log("data!!!!!!!!", data[0].mnemonic);
-    console.log("phase-----------------", phase);
     if (data && phase === data[0]?.mnemonic && data.length > 0) {
       try {
         console.log("----------------");
         window.alert("Your account is already exits");
-        // navigate("/");
       } catch (error) {
-        setErrorVisible(true);
         if (phase == "") {
           toast.warning("Enter your mnmonic key!");
         } else {
@@ -59,18 +37,15 @@ const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
         const mnemonic_key = phase;
         const wallet = ethers.Wallet.fromMnemonic(mnemonic_key);
 
-        // console.log("Privatekey :", wallet.privateKey);
-        // console.log("public key :", wallet.address);
         const sendRecoverData = {
           mnemonic: mnemonic_key,
           Private_key: wallet.privateKey,
           Public_key: wallet.address,
         };
-        console.log("sendRecoverData", sendRecoverData);
         sessionStorage.setItem("myData", JSON.stringify(sendRecoverData));
         window.location.href = "/recoveraccount";
       } catch (error) {
-        toast.error("Enter a valid mnmonic key")
+        toast.error("Enter a valid mnmonic key");
       }
     }
   };
@@ -116,15 +91,6 @@ const Recoverphase = ({ isFormVisible, setFormVisibility }) => {
             </div>
           </div>
         </div>
-        {/* {errorVisible ? (
-          <HandleError
-            errorMessage={errorMessage}
-            errorVisible={errorVisible}
-            setErrorVisible={setErrorVisible}
-          />
-        ) : (
-          ""
-        )} */}
       </div>
     </>
   );

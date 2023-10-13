@@ -9,11 +9,9 @@ export const WalletSlice = createSlice({
   initialState,
   reducers: {
     LockAccount: (state, action) => {
-      console.log("running", action.payload);
       state.check =action.payload;
     },
     unLockAccount: (state, action) => {
-      console.log("running.....", action.payload);
       state.check = action.payload;
     },
   },

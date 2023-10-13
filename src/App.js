@@ -1,5 +1,4 @@
 import React from 'react'
-import Generatewallet from './pages/Generatewallet'
 import Allrouters from './routers/allrouters'
 const App = () => {
   

@@ -12,7 +12,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
-  acc1: userAccReducer, // Use the imported reducer here
+  acc1: userAccReducer,
   auth: WalletSliceReducer,
   pwd : userPwdSliceReducer
 });

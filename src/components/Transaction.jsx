@@ -1,11 +1,10 @@
 import { React, useState } from "react";
 import { AiOutlineCloseSquare } from "react-icons/ai";
-import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { Hourglass } from "react-loader-spinner";
 import TrasactionHash from "./TrasactionHash";
 import { Blocks } from "react-loader-spinner";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const ethers = require("ethers");
@@ -17,10 +16,7 @@ const Transaction = ({
   selectedPublickey,
   selectedPrivateKey,
 }) => {
-  console.log("=-=-=-=-=-=-=-=-=-=-=-=-=-=-",HashLink);
   const provider = new ethers.providers.JsonRpcProvider(networkProvider);
-
-  console.log("provider==================================", provider);
 
   const Account = useSelector((state) => state.acc.acc1?.value);
 
@@ -42,13 +38,9 @@ const Transaction = ({
     setTransaction(false);
   };
 
-  console.log("amountamountamountamount", amount);
-
   const handleDropdownChange = async (event) => {
     const selectedValue = event.target.value;
     setSelectedOption(selectedValue);
-
-    console.log("account++++++++++++++>>>>>>>>>>>>>>>>>>>>", Account);
 
     if (selectedValue.startsWith("Account ")) {
       const accountIndex =
@@ -68,15 +60,12 @@ const Transaction = ({
           balance: balanceInEther,
         });
         setAddressLoading(false);
-        console.log("setAccountData 999999999", balanceInEther);
       } catch (error) {
         console.error("Error fetching balance:", error);
-        setAccountData(null); // Clear the data if there's an error
+        setAccountData(null);
       }
     }
   };
-
-  // const amount_eth = ethers.utils.parseEther(amount);
 
   const Transfer_Amount = async (event) => {
     event.preventDefault();
@@ -91,15 +80,13 @@ const Transaction = ({
       await tx.wait();
       setLoading(false);
       setHashModal(true);
-      const H = `${HashLink}${tx.hash}`
+      const H = `${HashLink}${tx.hash}`;
       setHash(H);
       toast.success("Transaction successfully");
     } catch (error) {
       console.log(error);
     }
   };
-
-  console.log("hash=-=-=-==-=-=-=-=-=-=-=-=-=-=-=-",Hash);
 
   return (
     <>
@@ -133,20 +120,8 @@ const Transaction = ({
                       {`Account ${index + 1}`}
                     </option>
                   ))}
-                  {/* <option value="generate">Generate Account</option>
-                <option value="recover">Recover Account</option> */}
                 </select>
-                {/* {selectedOption === "generate" || selectedOption === "recover" ? (
-                <button
-                  className="border-2 border-black rounded-lg text-xl p-2 w-auto"
-                  onClick={handleButtonClick}
-                  // disabled={!selectedOption}
-                >
-                  {selectedOption === "generate"
-                    ? "Generate Account"
-                    : "Recover Account"}
-                </button>
-              ) : ( */}
+
                 <div className="flex flex-col gap-4">
                   <p className="border-2 rounded-xl p-3 ">
                     {AddressLoading ? (
@@ -178,34 +153,17 @@ const Transaction = ({
                       Send
                     </button>
                   </form>
-                  {/* <h1 className="text-xl font-bold text-center">
-                  Balance: {accountData.balance} Ether
-                </h1> */}
-                  {/* <button className="text-4xl" onClick={handleTransaction}>
-                  <span className="flex justify-center">
-                    <BsFillArrowUpRightCircleFill
-                      className="text-center"
-                      fill="blue"
-                    />
-                  </span>
-                </button> */}
-                  {/* <button
-                  className="border-2 rounded-xl p-3"
-                  onClick={() => handlePrivatekey(accountData.Private_key)}
-                >
-                  Export Private_key
-                </button> */}
-
-                  {/* <p>Private Key: {accountData.Private_key}</p> */}
-                  {/* <p>Mnemonic: {accountData.mnemonic}</p> */}
                 </div>
-                {/* )} */}
               </div>
             </div>
           </div>
         )}
         {HashModal ? (
-          <TrasactionHash Hash={Hash} networkHashLink={HashLink} setHashModal={setHashModal} />
+          <TrasactionHash
+            Hash={Hash}
+            networkHashLink={HashLink}
+            setHashModal={setHashModal}
+          />
         ) : (
           ""
         )}

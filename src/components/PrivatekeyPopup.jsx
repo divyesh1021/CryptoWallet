@@ -3,12 +3,11 @@ import { useSelector } from "react-redux";
 import { AiOutlineCloseSquare } from "react-icons/ai";
 import { FaRegCopy } from "react-icons/fa";
 import { FaRegCheckCircle } from "react-icons/fa";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const Popup = ({ isModalOpen, setIsModalOpen, privateKey }) => {
+const Popup = ({ setIsModalOpen, privateKey }) => {
   const Account = useSelector((state) => state.acc.acc1.value);
-  console.log("------", Account);
 
   const [copied, setCopied] = useState(false);
 
@@ -22,7 +21,7 @@ const Popup = ({ isModalOpen, setIsModalOpen, privateKey }) => {
       .writeText(text)
       .then(() => {
         setCopied(true);
-        setTimeout(()=>setCopied(false),6000);
+        setTimeout(() => setCopied(false), 6000);
         toast.success("copied!!");
       })
       .catch((error) => console.log(error));

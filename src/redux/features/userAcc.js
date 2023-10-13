@@ -9,11 +9,9 @@ export const userAccSlice = createSlice({
   initialState,
   reducers: {
     userAccount: (state, action) => {
-      console.log("newData", action.payload);
       state.value.push(action.payload);
     },
     removeUser: (state, action) => {
-      console.log("first", action.payload);
       state.value = state.value.filter(
         (item) => item.Public_key !== action.payload
       );

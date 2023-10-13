@@ -12,7 +12,6 @@ const DownloadPhase = ({ setDownloadPhase, newAccount, setAddWalletModal }) => {
     setDownloadPhase(false);
     setAddWalletModal(false);
   };
-  console.log("newAccount-->>", newAccount.mnemonic);
 
   const copy_text = () => {
     const text = newAccount.mnemonic;

@@ -9,7 +9,6 @@ export const userPwdSlice = createSlice({
   initialState,
   reducers: {
     userPassword: (state, action) => {
-        console.log("------------------",action.payload)
         state.password = action.payload;      
     },
   },

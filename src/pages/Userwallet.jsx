@@ -2,19 +2,18 @@ import { React, useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { userAccount } from "../redux/features/userAcc";
 import { LockAccount, unLockAccount } from "../redux/features/LockUnlock";
-import { useNavigate, useLocation } from "react-router-dom";
 import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
-import { FaWallet } from "react-icons/fa";
-import { FaLock } from "react-icons/fa";
-import { FaEthereum } from "react-icons/fa";
+import {
+  FaWallet,
+  FaLock,
+  FaEthereum,
+  FaRegCopy,
+  FaTrashRestoreAlt,
+  FaUnlock,
+  FaRegCheckCircle,
+} from "react-icons/fa";
 import { SiBinance } from "react-icons/si";
-import { FaRegCopy } from "react-icons/fa";
-import { FaTrashRestoreAlt } from "react-icons/fa";
-import { FaUnlock } from "react-icons/fa";
-import { FaRegCheckCircle } from "react-icons/fa";
-import { removeUser } from "../redux/features/userAcc";
 import { ThreeDots } from "react-loader-spinner";
-import { ProgressBar } from "react-loader-spinner";
 import { Blocks } from "react-loader-spinner";
 import Form from "../components/Recoverphase";
 import AddAccount from "../components/AddAccount";
@@ -24,21 +23,15 @@ import DownloadPhase from "../components/DownloadPhase";
 import Password from "../components/Password";
 import DeleteModal from "../components/DeleteModal";
 import ShowAddress from "../components/TransactionHistoryData";
-import EthereumLogo from "../Asset/ethereum.ico";
-import BNBLogo from "../Asset/bnb.png";
+import axios from "axios";
+import { ethers } from "ethers";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios, { getAdapter } from "axios";
-import { ethers } from "ethers";
-// const ethers = require("ethers");
+
 const bip39 = require("bip39");
 const Buffer = require("buffer");
 
 const Userwallet = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const recoverData = location.state?.data || null;
-
   const [selectedOption, setSelectedOption] = useState("Account 1");
   const [chainNetwork, setChainNetwork] = useState("Ethereum Testnet");
   const [accountData, setAccountData] = useState({
@@ -47,8 +40,7 @@ const Userwallet = () => {
     mnemonic: "",
   });
   const [isFormVisible, setFormVisibility] = useState(false);
-  const [buttonDisabled, setButtonDisabled] = useState(false);
-  const [AddWalletModal,setAddWalletModal] = useState(false);
+  const [AddWalletModal, setAddWalletModal] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPrivateKey, setSelectedPrivateKey] = useState("");
   const [selectedPublickey, setSelectedPublickey] = useState("");
@@ -61,10 +53,9 @@ const Userwallet = () => {
   const [BalanceLoading, setBalanceLoading] = useState(false);
   const [AddressLoading, setAddressLoading] = useState(false);
   const [networkProvider, setNetworkProvider] = useState("");
-  const [currency,setCurrency] = useState("");
+  const [currency, setCurrency] = useState("");
   const [HashLink, setHashLink] = useState("");
   const [History, setHistory] = useState([]);
-  const [TransactionType,setTransactionType] = useState("");
   const [API, setAPI] = useState("");
 
   const Network = [
@@ -87,26 +78,6 @@ const Userwallet = () => {
     },
   ];
 
-  // const provider = new ethers.providers.JsonRpcProvider(
-  //   "https://sepolia.infura.io/v3/a000e9d4c4a84f2da055fd797eab742f"
-  // );
-
-  // const provider = new ethers.providers.JsonRpcProvider(
-  //   "https://data-seed-prebsc-1-s1.binance.org:8545/"
-  // );
-
-  // try {
-  //   const data = Network?.filter((el) => el.Network_Name === chainNetwork);
-  //   const selected_provider = data[0].Network_Provider;
-  //   const provider = new ethers.providers.JsonRpcProvider(selected_provider);
-  // } catch (error) {
-  //   console.log("select your network");
-  // }
-
-  // const handleButtonClick = () => {
-  //   setFormVisibility(!isFormVisible);
-  // };
-
   const handlelock = useSelector((state) => state.acc.auth.check);
   const GetPassword = useSelector((state) => state.acc.pwd.password);
   const dispatch = useDispatch();
@@ -122,7 +93,6 @@ const Userwallet = () => {
   const Account = useSelector((state) => state.acc.acc1?.value);
 
   useEffect(() => {
-    // When the component first loads, set the default option and display its data
     handleDropdownChange({ target: { value: selectedOption } });
     handleChangeChainNetwork({ target: { value: chainNetwork } });
   }, [chainNetwork]);
@@ -133,14 +103,9 @@ const Userwallet = () => {
     }
   }, [accountData]);
 
-  const handlePrivatekey = (privateKey) => {
-    setSelectedPrivateKey(privateKey);
-    setIsModalOpen(true);
-  };
-
   const Add_Address = () => {
     setAddWalletModal(true);
-  }
+  };
 
   const unlockPrivatekey = (privateKey) => {
     setSelectedPrivateKey(privateKey);
@@ -154,7 +119,7 @@ const Userwallet = () => {
         .writeText(text)
         .then(() => {
           setCopied(true);
-          setTimeout(()=>setCopied(false),6000);
+          setTimeout(() => setCopied(false), 6000);
           toast.success("copied!!");
         })
         .catch((error) => console.log(error));
@@ -169,39 +134,28 @@ const Userwallet = () => {
     setSelectedPrivateKey(privatekey);
   };
 
-  // console.log(openTransaction);
-
   const handleChangeChainNetwork = (event) => {
     const selectedChainNetwork = event.target.value;
-    // console.log("selectedChainNetwork------->>>>>>>>", selectedChainNetwork);
     setChainNetwork(selectedChainNetwork);
   };
 
   const handleDropdownChange = async (event) => {
     const selectedValue = event.target.value;
-    // console.log("selectedValue------->>>>>>>>", selectedValue);
     setSelectedOption(selectedValue);
 
     if (selectedValue.startsWith("Account ")) {
-      // console.log("selectedValue-----------------", selectedValue);
       const accountIndex = parseInt(selectedValue.replace("Account ", "")) - 1;
-      // console.log("-----------------", accountIndex);
       const account = Account[accountIndex];
 
       try {
         const data = Network?.filter((el) => el.Network_Name === chainNetwork);
         const getTransactionAPI = data[0].Network_API;
-        // const add = "12465165";
-        // const api_url = getTransactionAPI.replace("YOUR_ADDRESS_HERE",add);
-        console.log("getTransactionAPI---------", getTransactionAPI);
         setAPI(getTransactionAPI);
         setCurrency(data[0].Network_Currency);
-        // console.log("api_url---------",api_url);
 
         const selected_provider = data[0].Network_Provider;
         const hash = data[0].Explore_Hash;
         setNetworkProvider(selected_provider);
-        // console.log("hash-------------000000000000000",hash);
         setHashLink(hash);
         const provider = new ethers.providers.JsonRpcProvider(
           selected_provider
@@ -218,61 +172,15 @@ const Userwallet = () => {
           balance: balanceInEther,
         });
         setAddressLoading(false);
-        // Transaction_history();
-        // console.log("setAccountData 999999999", accountData);
       } catch (error) {
         console.error("Error fetching balance:", error);
-        setAccountData(null); // Clear the data if there's an error
+        setAccountData(null);
       }
-    }
-  };
-
-  const get_account = () => {
-    setButtonDisabled(true);
-    window.Buffer = window.Buffer || require("buffer").Buffer;
-
-    // Get the mnemonic (recovery phrase)
-    const mnemonic = bip39.generateMnemonic();
-    // console.log("mnemonic", mnemonic);
-
-    // Create a new random wallet
-    const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-    const Private_key = wallet.privateKey;
-    const Public_key = wallet.address;
-
-    // console.log("Privatekey :", wallet.privateKey);
-    // console.log("public key :", wallet.address);
-
-    const Acc = {
-      mnemonic: mnemonic,
-      Private_key: Private_key,
-      Public_key: Public_key,
-    };
-    dispatch(userAccount(Acc));
-    setDownloadPhase(true);
-    setNewAccount(Acc);
-    // navigate("/");
-  };
-
-  const handleButtonClick = () => {
-    if (selectedOption === "generate") {
-      // Handle Generate Account logic
-      get_account();
-    } else if (selectedOption === "recover") {
-      // Handle Recover Account logic
-      // For example, set isFormVisible to true to show the form
-      setFormVisibility(!isFormVisible);
     }
   };
 
   const handleRecoverAccoount = () => {
     setFormVisibility(!isFormVisible);
-  };
-
-  const Delete_Account = (id) => {
-    // console.log("fdggfjjhjk", id);
-    dispatch(removeUser(id));
-    window.location.reload();
   };
 
   const handleDelete = () => {
@@ -288,34 +196,23 @@ const Userwallet = () => {
   };
 
   const Transaction_history = async () => {
-    // console.log("accountData==========>>>>>>>", accountData);
-    // console.log("API_URL",API);
     const base_api = API.replace("YOUR_ADDRESS_HERE", accountData?.Public_key);
-    // console.log(base_api);
-    // const base_api = `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${accountData?.Public_key}&api-key=1b852b584c7b438589e7406db62a9e99`;
+
     try {
       const response = await axios.get(base_api);
       const transactions = response.data.result;
       if (Array.isArray(transactions)) {
-        // console.log("------------------------", transactions);
         const filter_transaction = transactions.reverse();
         const latest_transaction = [];
         for (let i = 0; i < 5; i++) {
           if (filter_transaction[i] != undefined) {
-            console.log("accountData.Public_key------->>>>>>>>>>",accountData.Public_key);
-            console.log("filter_transaction[i].from------->>>>>>>>>>",filter_transaction[i].from);
             const select_add = accountData.Public_key.toLowerCase();
             const add = filter_transaction[i].from;
-            // console.log("Addddddddddddddd",add);
-            if(select_add===add){
-              console.log("inside if");
+            if (select_add === add) {
               filter_transaction[i].Type = "send";
-            }
-            else{
-              console.log("outside if");
+            } else {
               filter_transaction[i].Type = "receive";
             }
-            // setTransactionType()
             latest_transaction.push(filter_transaction[i]);
           }
         }
@@ -323,14 +220,10 @@ const Userwallet = () => {
       } else {
         console.error("API response is not an array:", transactions);
       }
-
-      // setHistory(transactions);
     } catch (error) {
       console.log(error);
     }
   };
-
-  console.log("History.............", History);
 
   return (
     <>
@@ -383,7 +276,6 @@ const Userwallet = () => {
                 ))}
             </select>
           </div>
-          {/* <img src={EthereumLogo} alt="" /> */}
           {chainNetwork === "" ? (
             ""
           ) : (
@@ -450,16 +342,10 @@ const Userwallet = () => {
                               <div className="flex items-center gap-2">
                                 <span>Balance : {accountData?.balance}</span>
                                 ETH
-                                {/* <FaEthereum className="text-2xl" /> */}
                               </div>
                             ) : chainNetwork === "Binance Testnet" ? (
                               <div className="flex items-center gap-2">
                                 <span>Balance : {accountData?.balance}</span>
-                                BNB
-                                {/* <SiBinance
-                                  fill="#F3BA2F"
-                                  className="text-2xl"
-                                /> */}
                               </div>
                             ) : (
                               ""
@@ -492,37 +378,16 @@ const Userwallet = () => {
                       </button>
                       <button
                         className="border-2 rounded-xl p-3"
-                        // onClick={() => Delete_Account(accountData.Public_key)}
                         onClick={handleDelete}
                       >
                         Delete Account
                       </button>
-                      <ShowAddress History={History} HashLink={HashLink} currency={currency} accountData={accountData}/>
-                      {/* <div className="flex flex-col justify-center items-center gap-3">
-                        <h1 className="text-xl font-semibold">
-                          Account history
-                        </h1>
-
-                        <table className="border border-gray-200 w-full">
-                          <thead>
-                            <tr>
-                              <th className="">From</th>
-                              <th className="">To</th>
-                              <th className="">Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {History &&
-                              History?.map((item) => (
-                                <tr>
-                                  <td onMouseEnter={()=>setShowFullAddress(true)} onMouseLeave={()=>setShowFullAddress(false)}>{showFullAddress ? <ShowAddress/> :(item.from).substring(0,8)}</td>
-                                  <td>{(item.to).substring(0,8)}</td>
-                                  <td>{item.value}</td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div> */}
+                      <ShowAddress
+                        History={History}
+                        HashLink={HashLink}
+                        currency={currency}
+                        accountData={accountData}
+                      />
                     </>
                   )}
                 </div>
@@ -530,7 +395,11 @@ const Userwallet = () => {
             </>
           )}
 
-          {AddWalletModal ? (<AddAccount setAddWalletModal={setAddWalletModal}/>):("")}
+          {AddWalletModal ? (
+            <AddAccount setAddWalletModal={setAddWalletModal} />
+          ) : (
+            ""
+          )}
 
           {isFormVisible ? (
             <Form

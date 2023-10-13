@@ -1,9 +1,8 @@
 import { React, useState } from "react";
 import { ethers } from "ethers";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import { userAccount } from "../redux/features/userAcc";
 import DownloadPhase from "./DownloadPhase";
-// const ethers = require("ethers");
 const bip39 = require("bip39");
 const Buffer = require("buffer");
 
@@ -17,20 +16,15 @@ const AddAccount = ({ setAddWalletModal }) => {
   };
 
   const get_account = () => {
-    // setButtonDisabled(true);
     window.Buffer = window.Buffer || require("buffer").Buffer;
 
     // Get the mnemonic (recovery phrase)
     const mnemonic = bip39.generateMnemonic();
-    // console.log("mnemonic", mnemonic);
 
     // Create a new random wallet
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
     const Private_key = wallet.privateKey;
     const Public_key = wallet.address;
-
-    // console.log("Privatekey :", wallet.privateKey);
-    // console.log("public key :", wallet.address);
 
     const Acc = {
       mnemonic: mnemonic,
@@ -40,11 +34,8 @@ const AddAccount = ({ setAddWalletModal }) => {
     dispatch(userAccount(Acc));
     setDownloadPhase(true);
     setNewAccount(Acc);
-    // setAddWalletModal(false);
-    // navigate("/");
   };
 
-  console.log("downloadPhase-------", downloadPhase);
   return (
     <>
       <div className="border-2 shadow-xl rounded-xl w-full md:mx-5">
@@ -57,7 +48,6 @@ const AddAccount = ({ setAddWalletModal }) => {
                 <button
                   className="rounded-xl p-2 px-5 bg-green-500"
                   onClick={get_account}
-                  // onClick={Enter_Password}
                 >
                   Yes
                 </button>

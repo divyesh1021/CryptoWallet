@@ -4,14 +4,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { userPassword } from "../redux/features/SetPassword";
 import { LockAccount, unLockAccount } from "../redux/features/LockUnlock";
 import Popup from "./PrivatekeyPopup";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPrivateKey}) => {
+const Password = ({
+  setPasswordVisible,
+  setIsModalOpen,
+  isModalOpen,
+  selectedPrivateKey,
+}) => {
   const [newPassword, setPassword] = useState();
 
   const checkPassword = useSelector((state) => state.acc.pwd.password);
-  console.log("checkPassword", checkPassword);
 
   const dispatch = useDispatch();
 
@@ -22,11 +26,9 @@ const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPri
     e.preventDefault();
     if (!checkPassword) {
       dispatch(userPassword(newPassword));
-      // console.log(checkPassword.password);
-    } else if (checkPassword === newPassword && isModalOpen == false) {
+    } else if (checkPassword === newPassword && isModalOpen === false) {
       setIsModalOpen(true);
       setPasswordVisible(false);
-      // console.log("typeofcheckPassword---", typeof password);
     } else if (checkPassword === newPassword) {
       dispatch(unLockAccount(true));
       setPasswordVisible(false);
@@ -36,13 +38,6 @@ const Password = ({ setPasswordVisible, setIsModalOpen, isModalOpen, selectedPri
     }
   };
 
-  //   const handleLockUnlock = () => {
-  //     if(!checkPassword){
-
-  //     }
-  //   }
-
-  console.log("password", newPassword);
   return (
     <>
       <div className="border-2 shadow-xl rounded-xl w-full md:mx-5">
