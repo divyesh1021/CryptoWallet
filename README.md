@@ -1,12 +1,25 @@
 # CryptoWallet
 
-A web cryptocurrency wallet is a convenient and accessible solution for managing your digital assets in the world of cryptocurrencies. It is a software application that operates within your web browser, allowing you to interact with your crypto holfile:///home/empiric-u3/Pictures/Screenshots/Screenshot%20from%202023-07-20%2010-16-33.png
+A web cryptocurrency wallet is a convenient and accessible solution for managing your digital assets in the world of cryptocurrencies. It is a software application that operates within your web browser, allowing you to interact with your crypto 
 dings from any internet-connected device. Here are some key features and aspects of a web cryptocurrency wallet:
 
 # Tech Stacks
 1. Backend Framework: Node.js
 2. Frontend Framework: JavaScript, React.js, Tailwind CSS
 3. DataStore: Redux
+
+
+
+
+
+file:///home/empiric-u3/Pictures/Screenshots/abc.png
+
+
+file:///home/empiric-u3/Pictures/Screenshots/abc.png
+
+
+
+
 
 # Features
 1. Create a New Account
@@ -27,6 +40,7 @@ Our wallet keeps a detailed history of all previous transactions. Users can easi
 6. Transfer and Receive Cryptocurrency
 Users can transfer cryptocurrency to other users by providing the recipient's wallet address. They can also receive cryptocurrency from others using their wallet address.
 
+file:///home/empiric-u3/Pictures/Screenshots/Screenshot%20from%202023-10-13%2012-40-53.png
 
 
 # Install dependencies
@@ -87,6 +101,7 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/a
 This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
 ### Advanced Configuration
+
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
