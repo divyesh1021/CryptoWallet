@@ -30,12 +30,8 @@ A web cryptocurrency wallet is a convenient and accessible solution for managing
 ## Getting Started
 
 In the project directory, you can run:
+1. Clone the repository:
 
-- **Backend** : 
-```bash
-	npm i
-
-## Run Project
-- **Frontend** :
-```bash
-	npm start
+   ```bash
+   
+   git clone https://github.com/vinayahiwse/Dex-back.git
