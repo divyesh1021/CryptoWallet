@@ -1,6 +1,7 @@
 # CryptoWallet
 
-A web cryptocurrency wallet is a convenient and accessible solution for managing your digital assets in the world of cryptocurrencies. It is a software application that operates within your web browser, allowing you to interact with your crypto holdings from any internet-connected device. Here are some key features and aspects of a web cryptocurrency wallet:
+A web cryptocurrency wallet is a convenient and accessible solution for managing your digital assets in the world of cryptocurrencies. It is a software application that operates within your web browser, allowing you to interact with your crypto holfile:///home/empiric-u3/Pictures/Screenshots/Screenshot%20from%202023-07-20%2010-16-33.png
+dings from any internet-connected device. Here are some key features and aspects of a web cryptocurrency wallet:
 
 # Tech Stacks
 1. Backend Framework: Node.js
